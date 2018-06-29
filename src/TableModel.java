@@ -2,9 +2,8 @@ import javax.swing.table.AbstractTableModel;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.LongSummaryStatistics;
+import java.util.*;
+import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 
 import static java.nio.file.StandardOpenOption.*;
@@ -13,6 +12,7 @@ public class TableModel extends AbstractTableModel {
     private static String[] COL_NAMES = {"Имя задачи", "Начало", "Окончание", "Продолжительность"};
 
     private List<Task> taskList = new ArrayList<>();
+    private List<Task> regularTaskList = new ArrayList<>();
 
     @Override
     public String getColumnName(int column) {
@@ -25,7 +25,10 @@ public class TableModel extends AbstractTableModel {
     }
 
     void addTask(String name, boolean isConf) {
-        taskList.add(new Task(name, isConf));
+        Task task = new Task(name, isConf);
+        taskList.add(task);
+        if (!isConf)
+            regularTaskList.add(task);
     }
 
     void finishLastTask() {
@@ -87,10 +90,32 @@ public class TableModel extends AbstractTableModel {
     }
 
     void normalizeDurations(int hours) {
-        final List<Task> regularTasks = taskList.stream().filter(Task::isRegular).filter(task -> task.getDuration() != 0).collect(Collectors.toList());
-        final LongSummaryStatistics collect = regularTasks.stream().collect(Collectors.summarizingLong(Task::getDuration));
+        final LongSummaryStatistics collect = regularTaskList.stream().collect(Collectors.summarizingLong(Task::getDuration));
         long estimatedMinutes = hours * 60;
         long multiplier = estimatedMinutes / collect.getSum();
-        regularTasks.forEach(task -> task.setDuration(task.getDuration() * multiplier));
+        regularTaskList.forEach(task -> task.setDuration(task.getDuration() * multiplier));
+        this.fireTableDataChanged();
+    }
+
+    public String[][] report() {
+        Map<String, Long> reportModel = new HashMap<>();
+        for (Task t : taskList) {
+            String tName = t.getName();
+            long tDuration = t.getDuration();
+
+            if (reportModel.containsKey(tName))
+                tDuration = reportModel.get(tName) + tDuration;
+            reportModel.put(tName, tDuration);
+        }
+
+        String[][] retVal = new String[reportModel.size()][2];
+        int cnt = 0;
+        for (Map.Entry<String, Long> row : reportModel.entrySet()) {
+            retVal[cnt][0] = row.getKey();
+            retVal[cnt][1] = row.getValue().toString();
+            cnt++;
+        }
+        return retVal;
+
     }
 }

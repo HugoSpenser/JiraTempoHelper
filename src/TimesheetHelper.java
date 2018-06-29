@@ -21,6 +21,7 @@ public class TimesheetHelper {
     private JRadioButton radioStrategy1;
     private JRadioButton radioStrategy2;
     private JCheckBox chkCommunicationTask;
+    private JButton btnReport;
     private ButtonGroup strategyGroup = new ButtonGroup();
 
     final JFileChooser fc = new JFileChooser();
@@ -107,6 +108,13 @@ public class TimesheetHelper {
                     tblModel.normalizeDurations(Integer.valueOf(spinner1.getValue().toString()));
                     tblModel.fireTableDataChanged();
                 }
+            }
+        });
+        btnReport.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                Report.show(tblModel.report());
             }
         });
     }

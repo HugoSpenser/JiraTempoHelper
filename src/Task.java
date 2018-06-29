@@ -5,10 +5,15 @@ import java.time.temporal.ChronoUnit;
 public class Task {
     private static final DateTimeFormatter FRMT = DateTimeFormatter.ofPattern("HH:mm");
 
+    public String getName() {
+        return name;
+    }
+
     private String name;
     private LocalTime startTime;
     private LocalTime endTime;
     private boolean isConf;
+    private long duration;
 
     public void setDuration(long duration) {
         this.duration = duration;
@@ -22,7 +27,6 @@ public class Task {
         return duration;
     }
 
-    private long duration;
 
     Task(String name, boolean isConf) {
         this.name = name;

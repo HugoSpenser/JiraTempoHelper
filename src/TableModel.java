@@ -24,8 +24,8 @@ public class TableModel extends AbstractTableModel {
         return String.class;
     }
 
-    void addTask(String name) {
-        taskList.add(new Task(name));
+    void addTask(String name, boolean isConf) {
+        taskList.add(new Task(name, isConf));
     }
 
     void finishLastTask() {
@@ -40,6 +40,22 @@ public class TableModel extends AbstractTableModel {
     @Override
     public int getColumnCount() {
         return 4;
+    }
+
+    @Override
+    public boolean isCellEditable(int rowIndex, int columnIndex) {
+        return columnIndex == 0;
+    }
+
+    @Override
+    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+        switch (columnIndex) {
+            case 0:
+                taskList.get(rowIndex).setName(aValue.toString());
+                break;
+            default:
+                break;
+        }
     }
 
     @Override
@@ -71,9 +87,10 @@ public class TableModel extends AbstractTableModel {
     }
 
     void normalizeDurations(int hours) {
-        final LongSummaryStatistics collect = taskList.stream().collect(Collectors.summarizingLong(Task::getDuration));
+        final List<Task> regularTasks = taskList.stream().filter(Task::isRegular).filter(task -> task.getDuration() != 0).collect(Collectors.toList());
+        final LongSummaryStatistics collect = regularTasks.stream().collect(Collectors.summarizingLong(Task::getDuration));
         long estimatedMinutes = hours * 60;
         long multiplier = estimatedMinutes / collect.getSum();
-        taskList.forEach(task -> task.setDuration(task.getDuration() * multiplier));
+        regularTasks.forEach(task -> task.setDuration(task.getDuration() * multiplier));
     }
 }

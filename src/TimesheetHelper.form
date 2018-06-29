@@ -7,7 +7,7 @@
     <properties/>
     <border type="none"/>
     <children>
-      <grid id="46924" binding="northPanel" layout-manager="GridLayoutManager" row-count="1" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+      <grid id="46924" binding="northPanel" layout-manager="GridLayoutManager" row-count="1" column-count="5" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
         <margin top="5" left="5" bottom="5" right="5"/>
         <constraints border-constraint="North"/>
         <properties/>
@@ -23,27 +23,37 @@
           </component>
           <component id="3651" class="javax.swing.JButton" binding="start">
             <constraints>
-              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <text value="Начать"/>
             </properties>
           </component>
-          <component id="dd01a" class="javax.swing.JTextField" binding="textField1" default-binding="true">
+          <component id="6714a" class="javax.swing.JComboBox" binding="boxTaskName">
             <constraints>
               <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                 <preferred-size width="150" height="-1"/>
               </grid>
             </constraints>
-            <properties/>
+            <properties>
+              <editable value="true"/>
+            </properties>
           </component>
           <component id="149bc" class="javax.swing.JButton" binding="finish">
             <constraints>
-              <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <enabled value="false"/>
               <text value="Закончить"/>
+            </properties>
+          </component>
+          <component id="567b4" class="javax.swing.JCheckBox" binding="chkCommunicationTask">
+            <constraints>
+              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="ТКС"/>
             </properties>
           </component>
         </children>
@@ -164,9 +174,14 @@
             <children>
               <component id="e2bee" class="javax.swing.JTable" binding="taskList">
                 <constraints/>
-                <properties/>
+                <properties>
+                  <autoCreateRowSorter value="false"/>
+                  <columnSelectionAllowed value="true"/>
+                  <editingColumn value="-1"/>
+                  <editingRow value="-1"/>
+                </properties>
                 <clientProperties>
-                  <JTable.autoStartsEdit class="java.lang.Boolean" value="false"/>
+                  <JTable.autoStartsEdit class="java.lang.Boolean" value="true"/>
                 </clientProperties>
               </component>
             </children>

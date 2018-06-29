@@ -8,7 +8,7 @@ public class TimesheetHelper {
     private JPanel mainPanel;
     private JLabel lbl;
     private JButton start;
-    private JTextField textField1;
+    private JComboBox boxTaskName;
     private JButton finish;
     private JTable taskList;
     private JPanel northPanel;
@@ -20,6 +20,7 @@ public class TimesheetHelper {
     private JSpinner spinner1;
     private JRadioButton radioStrategy1;
     private JRadioButton radioStrategy2;
+    private JCheckBox chkCommunicationTask;
     private ButtonGroup strategyGroup = new ButtonGroup();
 
     final JFileChooser fc = new JFileChooser();
@@ -39,7 +40,19 @@ public class TimesheetHelper {
             public void mouseClicked(MouseEvent e) {
                 if (start.isEnabled()) {
                     super.mouseClicked(e);
-                    tblModel.addTask(textField1.getText());
+                    String curTaskName = boxTaskName.getSelectedItem().toString();
+                    tblModel.addTask(curTaskName, chkCommunicationTask.isSelected());
+
+                    boolean isCurNameInList = false;
+                    for (int i = 0; i < boxTaskName.getItemCount(); i++) {
+                        if (boxTaskName.getItemAt(i).toString().equals(curTaskName)) {
+                            isCurNameInList = true;
+                            break;
+                        }
+                    }
+                    if (!isCurNameInList)
+                        boxTaskName.addItem(boxTaskName.getSelectedItem().toString());
+
                     switchBtnsVisibility();
                     tblModel.fireTableRowsInserted(tblModel.getRowCount() - 1, tblModel.getRowCount());
                 }
@@ -83,6 +96,10 @@ public class TimesheetHelper {
         btnNormalize.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                if (Integer.parseInt(spinner1.getValue().toString()) == 0) {
+                    JOptionPane.showMessageDialog(null, "Для нормализации необходимо ввести продолжительность рабочего дня, отличную от нуля", "Предупреждение", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
                 super.mouseClicked(e);
                 if (radioStrategy2.isSelected()) {
                     JOptionPane.showMessageDialog(null, "NYI. Ждите следующей версии )", "Предупреждение", JOptionPane.WARNING_MESSAGE);
@@ -105,7 +122,7 @@ public class TimesheetHelper {
     private void switchBtnsVisibility() {
         start.setEnabled(!start.isEnabled());
         finish.setEnabled(!finish.isEnabled());
-        textField1.setEnabled(!textField1.isEnabled());
+        boxTaskName.setEnabled(!boxTaskName.isEnabled());
     }
 
 }

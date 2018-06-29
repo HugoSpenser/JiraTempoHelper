@@ -8,9 +8,14 @@ public class Task {
     private String name;
     private LocalTime startTime;
     private LocalTime endTime;
+    private boolean isConf;
 
     public void setDuration(long duration) {
         this.duration = duration;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public long getDuration() {
@@ -19,8 +24,9 @@ public class Task {
 
     private long duration;
 
-    Task(String name) {
+    Task(String name, boolean isConf) {
         this.name = name;
+        this.isConf = isConf;
         startTime = LocalTime.now();
     }
 
@@ -65,5 +71,9 @@ public class Task {
     public void calcDuration() {
         LocalTime effectiveEndTime = (endTime == null) ? LocalTime.now() : endTime;
         duration = startTime.until(effectiveEndTime, ChronoUnit.MINUTES);
+    }
+
+    public boolean isRegular() {
+        return !isConf;
     }
 }

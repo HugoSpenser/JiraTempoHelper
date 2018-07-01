@@ -1,6 +1,7 @@
 package ru.sbt.hls;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.LocalTime;
@@ -14,7 +15,7 @@ public class TimeSetter {
 
     private final Consumer<LocalTime> timeSetter;
 
-    private JFrame frame;
+    private JDialog frame;
 
     TimeSetter(Consumer<LocalTime> cons, int hours, int minutes) {
         spnHours.setModel(new SpinnerNumberModel(hours, 0, 23, 1));
@@ -36,10 +37,14 @@ public class TimeSetter {
         });
     }
 
-    void show() {
-        frame = new JFrame("Set Time");
+    void show(Point atPoint) {
+        System.out.println(atPoint);
+        frame = new JDialog((Frame) null, "Set Time");
+        frame.setModal(true);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setContentPane(rootPanel);
+        frame.setResizable(false);
+        frame.setLocation(atPoint);
         frame.pack();
         frame.setVisible(true);
     }

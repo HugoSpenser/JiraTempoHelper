@@ -5,7 +5,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.nio.file.Paths;
 import java.time.LocalTime;
-import java.util.Objects;
 
 public class TempoHelper {
     private final JFileChooser fc = new JFileChooser();
@@ -40,7 +39,11 @@ public class TempoHelper {
             public void mouseClicked(MouseEvent e) {
                 if (start.isEnabled()) {
                     super.mouseClicked(e);
-                    String curTaskName = Objects.requireNonNull(boxTaskName.getSelectedItem()).toString();
+                    if (boxTaskName.getSelectedItem() == null) {
+                        JOptionPane.showMessageDialog(null, "Введите имя задачи!", "Не указано имя задачи", JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
+                    String curTaskName = String.valueOf(boxTaskName.getSelectedItem());
                     tblModel.addTask(curTaskName, chkCommunicationTask.isSelected());
 
                     boolean isCurNameInList = false;
@@ -51,7 +54,7 @@ public class TempoHelper {
                         }
                     }
                     if (!isCurNameInList)
-                        boxTaskName.addItem(boxTaskName.getSelectedItem().toString());
+                        boxTaskName.addItem(curTaskName);
 
                     switchBtnsVisibility();
                     tblModel.fireTableRowsInserted(tblModel.getRowCount() - 1, tblModel.getRowCount());
@@ -129,7 +132,7 @@ public class TempoHelper {
                             int row = tblTasks.rowAtPoint(e.getPoint());
                             int column = tblTasks.columnAtPoint(e.getPoint());
                             LocalTime curTime = LocalTime.parse(tblModel.getValueAt(row, column).toString());
-                            new TimeSetter((time) -> tblModel.setValueAt(time, row, column), curTime.getHour(), curTime.getMinute()).show();
+                            new TimeSetter((time) -> tblModel.setValueAt(time, row, column), curTime.getHour(), curTime.getMinute()).show(e.getLocationOnScreen());
                             break;
                         default:
                             break;

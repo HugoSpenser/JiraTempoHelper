@@ -1,52 +1,52 @@
+package ru.sbt.hls;
+
 import javax.swing.*;
 import javax.swing.table.JTableHeader;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.nio.file.Paths;
+import java.time.LocalTime;
+import java.util.Objects;
 
-public class TimesheetHelper {
+public class TempoHelper {
+    private final JFileChooser fc = new JFileChooser();
     private JPanel mainPanel;
-    private JLabel lbl;
-    private JButton start;
-    private JComboBox boxTaskName;
-    private JButton finish;
-    private JTable taskList;
     private JPanel northPanel;
     private JPanel southPanel;
+    private JLabel lbl;
+    private JButton start;
+    private JComboBox<String> boxTaskName;
+    private JButton finish;
+    private JTable tblTasks;
     private JButton btnImport;
     private JButton btnExport;
     private JButton btnRecalc;
     private JButton btnNormalize;
-    private JSpinner spinner1;
-    private JRadioButton radioStrategy1;
-    private JRadioButton radioStrategy2;
+    private JSpinner spnElapsedHours;
     private JCheckBox chkCommunicationTask;
     private JButton btnReport;
-    private ButtonGroup strategyGroup = new ButtonGroup();
+    private JSpinner spnStepMinutes;
+    private final TableModel tblModel = new TableModel();
 
-    final JFileChooser fc = new JFileChooser();
+    private TempoHelper() {
 
-    private TableModel tblModel = new TableModel();
+        tblTasks.setModel(tblModel);
+        tblTasks.setTableHeader(new JTableHeader());
 
-    public TimesheetHelper() {
-        strategyGroup.add(radioStrategy1);
-        strategyGroup.add(radioStrategy2);
-        strategyGroup.setSelected(radioStrategy1.getModel(), true);
-
-        taskList.setModel(tblModel);
-        taskList.setTableHeader(new JTableHeader());
+        spnElapsedHours.setModel(new SpinnerNumberModel(8, 0, 10, 1));
+        spnStepMinutes.setModel(new SpinnerNumberModel(6, 0, Integer.MAX_VALUE, 1));
 
         start.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (start.isEnabled()) {
                     super.mouseClicked(e);
-                    String curTaskName = boxTaskName.getSelectedItem().toString();
+                    String curTaskName = Objects.requireNonNull(boxTaskName.getSelectedItem()).toString();
                     tblModel.addTask(curTaskName, chkCommunicationTask.isSelected());
 
                     boolean isCurNameInList = false;
                     for (int i = 0; i < boxTaskName.getItemCount(); i++) {
-                        if (boxTaskName.getItemAt(i).toString().equals(curTaskName)) {
+                        if (boxTaskName.getItemAt(i).equals(curTaskName)) {
                             isCurNameInList = true;
                             break;
                         }
@@ -90,38 +90,59 @@ public class TimesheetHelper {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                tblModel.recalcDurations();
+                tblModel.reCalcDurations();
                 tblModel.fireTableDataChanged();
             }
         });
         btnNormalize.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (Integer.parseInt(spinner1.getValue().toString()) == 0) {
-                    JOptionPane.showMessageDialog(null, "Для нормализации необходимо ввести продолжительность рабочего дня, отличную от нуля", "Предупреждение", JOptionPane.WARNING_MESSAGE);
+                if (Integer.parseInt(spnElapsedHours.getValue().toString()) == 0) {
+                    JOptionPane.showMessageDialog(null, "Для нормализации необходимо ввести продолжительность рабочего дня, отличную от нуля", "Ошибка", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
                 super.mouseClicked(e);
-                if (radioStrategy2.isSelected()) {
-                    JOptionPane.showMessageDialog(null, "NYI. Ждите следующей версии )", "Предупреждение", JOptionPane.WARNING_MESSAGE);
-                } else {
-                    tblModel.normalizeDurations(Integer.valueOf(spinner1.getValue().toString()));
-                    tblModel.fireTableDataChanged();
-                }
+                tblModel.normalizeDurations(Integer.valueOf(spnElapsedHours.getValue().toString()));
+                tblModel.fireTableDataChanged();
             }
         });
         btnReport.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                super.mouseClicked(e);
-                Report.show(tblModel.report());
+                int elapsedMinutes = Integer.valueOf(spnElapsedHours.getValue().toString()) * 60;
+                int stepMinutes = Integer.valueOf(spnStepMinutes.getValue().toString());
+
+                if (elapsedMinutes % stepMinutes != 0) {
+                    JOptionPane.showMessageDialog(null, "Шаг должен быть кратен целевому общему времени!", "Ошибка", JOptionPane.WARNING_MESSAGE);
+                } else {
+                    super.mouseClicked(e);
+                    Report.show(tblModel.report(elapsedMinutes, stepMinutes));
+                }
+            }
+        });
+        tblTasks.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() >= 2) {
+                    switch (tblTasks.columnAtPoint(e.getPoint())) {
+                        case 1:
+                        case 2:
+                            int row = tblTasks.rowAtPoint(e.getPoint());
+                            int column = tblTasks.columnAtPoint(e.getPoint());
+                            LocalTime curTime = LocalTime.parse(tblModel.getValueAt(row, column).toString());
+                            new TimeSetter((time) -> tblModel.setValueAt(time, row, column), curTime.getHour(), curTime.getMinute()).show();
+                            break;
+                        default:
+                            break;
+                    }
+                }
             }
         });
     }
 
     public static void main(String[] args) {
-        JFrame frame = new JFrame("TimesheetHelper");
-        frame.setContentPane(new TimesheetHelper().mainPanel);
+        JFrame frame = new JFrame("TempoHelper");
+        frame.setContentPane(new TempoHelper().mainPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
@@ -134,3 +155,5 @@ public class TimesheetHelper {
     }
 
 }
+
+

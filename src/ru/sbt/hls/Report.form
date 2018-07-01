@@ -17,7 +17,10 @@
         <children>
           <component id="d1cc4" class="javax.swing.JTable" binding="tblReport">
             <constraints/>
-            <properties/>
+            <properties>
+              <cellSelectionEnabled value="true"/>
+              <columnSelectionAllowed value="true"/>
+            </properties>
           </component>
         </children>
       </scrollpane>

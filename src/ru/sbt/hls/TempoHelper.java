@@ -1,7 +1,6 @@
 package ru.sbt.hls;
 
 import javax.swing.*;
-import javax.swing.table.JTableHeader;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.nio.file.Paths;
@@ -26,15 +25,15 @@ public class TempoHelper {
     private JCheckBox chkCommunicationTask;
     private JButton btnReport;
     private JSpinner spnStepMinutes;
+    private JScrollPane scrollPane;
     private final TableModel tblModel = new TableModel();
 
     private TempoHelper() {
 
         tblTasks.setModel(tblModel);
-        tblTasks.setTableHeader(new JTableHeader());
 
         spnElapsedHours.setModel(new SpinnerNumberModel(8, 0, 10, 1));
-        spnStepMinutes.setModel(new SpinnerNumberModel(6, 0, Integer.MAX_VALUE, 1));
+        spnStepMinutes.setModel(new SpinnerNumberModel(6, 0, 600, 1));
 
         start.addMouseListener(new MouseAdapter() {
             @Override

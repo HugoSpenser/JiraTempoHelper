@@ -85,7 +85,9 @@ class TableModel extends AbstractTableModel {
                 curTask.setDuration(Long.parseLong(aValue.toString()));
                 break;
             case 4:
-                curTask.setTeleconference(Boolean.parseBoolean(aValue.toString()));
+                boolean newVal = Boolean.parseBoolean(aValue.toString());
+                taskList.stream().filter(t -> t.getName().equals(curTask.getName())).forEach(t -> t.setTeleconference(newVal));
+                fireTableDataChanged();
                 break;
             default:
                 break;
@@ -108,7 +110,7 @@ class TableModel extends AbstractTableModel {
         taskList = new ArrayList<>();
 
         try {
-            for (String line: Files.readAllLines(filePath)) {
+            for (String line : Files.readAllLines(filePath)) {
                 final Task task = new Task(line);
                 taskList.add(task);
             }
@@ -117,7 +119,7 @@ class TableModel extends AbstractTableModel {
     }
 
     void reCalcDurations() {
-        for (Task task: taskList) {
+        for (Task task : taskList) {
             task.calcDuration();
         }
     }
@@ -151,9 +153,10 @@ class TableModel extends AbstractTableModel {
 
         // Нормализация общего времени по указанному шагу
 
-        reportModel.putAll(confTasks.stream().collect(Collectors.toMap(Task::getName, Task::getDuration)));
+        confTasks.stream().collect(Collectors.groupingBy(Task::getName)).
+                forEach((key, val) -> reportModel.put(key, val.stream().collect(Collectors.summarizingLong(Task::getDuration)).getSum()));
 
-        for (Map.Entry<String, Long> entry: reportModel.entrySet()) {
+        for (Map.Entry<String, Long> entry : reportModel.entrySet()) {
             long duration = entry.getValue();
             long remainder = duration % step;
             if (remainder > step / 2) {
@@ -179,14 +182,26 @@ class TableModel extends AbstractTableModel {
 
         }
 
-        String[][] retVal = new String[reportModel.size()][2];
+        String[][] retVal = new String[reportModel.size() + 1][2];
         int cnt = 0;
-        for (Map.Entry<String, Long> row: reportModel.entrySet()) {
+        int overall = 0;
+        for (Map.Entry<String, Long> row : reportModel.entrySet()) {
             retVal[cnt][0] = row.getKey();
             retVal[cnt][1] = row.getValue().toString();
+            overall += row.getValue();
             cnt++;
         }
+        retVal[retVal.length - 1][0] = "Итого";
+        retVal[retVal.length - 1][1] = String.valueOf(overall);
         return retVal;
 
+    }
+
+    public void removeRows(int... rows) {
+        Arrays.sort(rows);
+        for (int i = rows.length - 1; i >= 0; i--) {
+            taskList.remove(rows[i] - 1);
+        }
+        fireTableDataChanged();
     }
 }

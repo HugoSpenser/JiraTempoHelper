@@ -1,10 +1,18 @@
 package ru.sbt.hls;
 
 import javax.swing.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalTime;
+
+import static java.nio.file.StandardOpenOption.*;
 
 public class TempoHelper {
     private final JFileChooser fc = new JFileChooser();
@@ -27,7 +35,10 @@ public class TempoHelper {
     private JScrollPane scrollPane;
     private final TableModel tblModel = new TableModel();
 
-    private TempoHelper() {
+    private TempoHelper() throws IOException {
+        System.setErr(new PrintStream(Files.newOutputStream(Paths.get("eer.log"), WRITE, CREATE, APPEND)));
+        btnImport.setIcon(UIManager.getIcon("FileView.directoryIcon"));
+        btnExport.setIcon(UIManager.getIcon("FileView.floppyDriveIcon"));
 
         tblTasks.setModel(tblModel);
 
@@ -83,6 +94,8 @@ public class TempoHelper {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                fc.setCurrentDirectory(new File(System.getenv("userprofile") + "\\desktop"));
+                fc.getActionMap().get("viewTypeDetails").actionPerformed(null);
                 fc.showOpenDialog(null);
                 tblModel.deserialize(Paths.get(fc.getSelectedFile().getAbsolutePath()));
                 tblModel.fireTableDataChanged();
@@ -140,9 +153,18 @@ public class TempoHelper {
                 }
             }
         });
+        tblTasks.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if (e.getKeyChar() == KeyEvent.VK_DELETE) {
+                    removeRows();
+                }
+                super.keyTyped(e);
+            }
+        });
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         JFrame frame = new JFrame("TempoHelper");
         frame.setContentPane(new TempoHelper().mainPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -154,6 +176,11 @@ public class TempoHelper {
         start.setEnabled(!start.isEnabled());
         finish.setEnabled(!finish.isEnabled());
         boxTaskName.setEnabled(!boxTaskName.isEnabled());
+    }
+
+    private void removeRows() {
+        int[] rows = tblTasks.getSelectedRows();
+        tblModel.removeRows(rows);
     }
 
 }

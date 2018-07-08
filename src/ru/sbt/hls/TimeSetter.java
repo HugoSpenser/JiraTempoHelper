@@ -38,7 +38,6 @@ public class TimeSetter {
     }
 
     void show(Point atPoint) {
-        System.out.println(atPoint);
         frame = new JDialog((Frame) null, "Set Time");
         frame.setModal(true);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);

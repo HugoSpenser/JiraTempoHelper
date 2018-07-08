@@ -1,20 +1,23 @@
 package ru.sbt.hls;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J;
+
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalTime;
 
-import static java.nio.file.StandardOpenOption.*;
-
 public class TempoHelper {
+    private static final Logger LOG = LoggerFactory.getLogger(Task.class);
+
     private final JFileChooser fc = new JFileChooser();
     private JPanel mainPanel;
     private JPanel northPanel;
@@ -36,7 +39,7 @@ public class TempoHelper {
     private final TableModel tblModel = new TableModel();
 
     private TempoHelper() throws IOException {
-        System.setErr(new PrintStream(Files.newOutputStream(Paths.get("eer.log"), WRITE, CREATE, APPEND)));
+        SysOutOverSLF4J.sendSystemOutAndErrToSLF4J();
         btnImport.setIcon(UIManager.getIcon("FileView.directoryIcon"));
         btnExport.setIcon(UIManager.getIcon("FileView.floppyDriveIcon"));
 
@@ -97,6 +100,7 @@ public class TempoHelper {
                 fc.setCurrentDirectory(new File(System.getenv("userprofile") + "\\desktop"));
                 fc.getActionMap().get("viewTypeDetails").actionPerformed(null);
                 fc.showOpenDialog(null);
+                fc.setFileFilter(new FileNameExtensionFilter("Comma-Separated Values", "csv"));
                 tblModel.deserialize(Paths.get(fc.getSelectedFile().getAbsolutePath()));
                 tblModel.fireTableDataChanged();
             }
@@ -131,7 +135,7 @@ public class TempoHelper {
                     JOptionPane.showMessageDialog(null, "Шаг должен быть кратен целевому общему времени!", "Ошибка", JOptionPane.WARNING_MESSAGE);
                 } else {
                     super.mouseClicked(e);
-                    Report.show(tblModel.report(elapsedMinutes, stepMinutes));
+                    Report.show(tblModel.report(elapsedMinutes, stepMinutes), elapsedMinutes);
                 }
             }
         });
@@ -159,7 +163,6 @@ public class TempoHelper {
                 if (e.getKeyChar() == KeyEvent.VK_DELETE) {
                     removeRows();
                 }
-                super.keyTyped(e);
             }
         });
     }

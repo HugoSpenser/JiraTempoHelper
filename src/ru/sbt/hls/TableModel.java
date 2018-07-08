@@ -111,8 +111,9 @@ class TableModel extends AbstractTableModel {
 
         try {
             for (String line : Files.readAllLines(filePath)) {
-                final Task task = new Task(line);
-                taskList.add(task);
+                final Task task = Task.deserialize(line);
+                if (task != null)
+                    taskList.add(task);
             }
         } catch (IOException ignored) {
         }
@@ -176,16 +177,19 @@ class TableModel extends AbstractTableModel {
             } else {
                 Comparator<Map.Entry<String, Long>> durationComparator = (m1, m2) -> (m1.getValue().equals(m2.getValue())) ? 0 : (m1.getValue() > m2.getValue()) ? 1 : -1;
                 reportModel.entrySet().stream()
-                        .sorted((fSum < 0) ? durationComparator : durationComparator.reversed())
-                        .limit(sum / step).forEach(entry -> entry.setValue(entry.getValue() + step * ((fSum > 0) ? -1 : 1)));
+                        .sorted((fSum > 0) ? durationComparator : durationComparator.reversed())
+                        .limit(Math.abs(sum) / step)
+                        .forEach(entry -> entry.setValue(entry.getValue() + step * ((fSum < 0) ? -1 : 1)));
             }
 
         }
 
-        String[][] retVal = new String[reportModel.size() + 1][2];
+        final List<Map.Entry<String, Long>> rTasks = reportModel.entrySet().stream().filter(entry -> entry.getValue() != 0).collect(Collectors.toList());
+
+        String[][] retVal = new String[rTasks.size() + 1][2];
         int cnt = 0;
         int overall = 0;
-        for (Map.Entry<String, Long> row : reportModel.entrySet()) {
+        for (Map.Entry<String, Long> row : rTasks) {
             retVal[cnt][0] = row.getKey();
             retVal[cnt][1] = row.getValue().toString();
             overall += row.getValue();
@@ -197,10 +201,10 @@ class TableModel extends AbstractTableModel {
 
     }
 
-    public void removeRows(int... rows) {
+    void removeRows(int... rows) {
         Arrays.sort(rows);
         for (int i = rows.length - 1; i >= 0; i--) {
-            taskList.remove(rows[i] - 1);
+            taskList.remove(rows[i]);
         }
         fireTableDataChanged();
     }

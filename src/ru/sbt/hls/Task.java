@@ -1,12 +1,18 @@
 package ru.sbt.hls;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
 class Task {
-    public static final DateTimeFormatter D_INP_FORMAT = DateTimeFormatter.ofPattern("H:m");
-    public static final DateTimeFormatter D_OUT_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
+    private static final Logger LOG = LoggerFactory.getLogger(Task.class);
+    private static final String ERR_COULD_NOT_DESERIALIZE = "Не удалось десериализовать задачу из строки: '%s'";
+    private static final DateTimeFormatter D_INP_FORMAT = DateTimeFormatter.ofPattern("H:m");
+    private static final DateTimeFormatter D_OUT_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
+    
     private String name;
     private LocalTime startTime;
     private LocalTime endTime;
@@ -19,13 +25,23 @@ class Task {
         startTime = LocalTime.now();
     }
 
-    Task(String serialized) {
+    static Task deserialize(String serialized) {
         String[] parts = serialized.split(";");
-        name = parts[0];
-        startTime = LocalTime.parse(parts[1], D_INP_FORMAT);
-        endTime = LocalTime.parse(parts[2], D_INP_FORMAT);
-        duration = Long.parseLong(parts[3]);
-        isTeleconference = Boolean.parseBoolean(parts[4]);
+        if (parts.length < 4) {
+            LOG.warn(String.format(ERR_COULD_NOT_DESERIALIZE, serialized));
+            return null;
+        } else {
+            Task curTask = new Task();
+            curTask.name = parts[0];
+            curTask.startTime = LocalTime.parse(parts[1], D_INP_FORMAT);
+            curTask.endTime = LocalTime.parse(parts[2], D_INP_FORMAT);
+            curTask.duration = Long.parseLong(parts[3]);
+            curTask.isTeleconference = Boolean.parseBoolean(parts[4]);
+            return curTask;
+        }
+    }
+
+    private Task() {
     }
 
     String getName() {

@@ -10,9 +10,9 @@ import java.time.temporal.ChronoUnit;
 class Task {
     private static final Logger LOG = LoggerFactory.getLogger(Task.class);
     private static final String ERR_COULD_NOT_DESERIALIZE = "Не удалось десериализовать задачу из строки: '%s'";
-    private static final DateTimeFormatter D_INP_FORMAT = DateTimeFormatter.ofPattern("H:m");
+    static final DateTimeFormatter D_INP_FORMAT = DateTimeFormatter.ofPattern("H:m");
     private static final DateTimeFormatter D_OUT_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
-    
+
     private String name;
     private LocalTime startTime;
     private LocalTime endTime;
